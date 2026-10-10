@@ -1,34 +1,47 @@
-"""
-AI Resume Analyzer — FastAPI application entry point.
-
-Registered routes:
-  GET  /api/health    — liveness check (Phase 1)
-  POST /api/analyze   — resume analysis (Phase 3)
-"""
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
-from routers.analyze import router as analyze_router
+from analyzer import analyze_resume
 
 app = FastAPI(
     title="AI Resume Analyzer API",
-    version="0.3.0",
-    description="Analyze resume and job-description text to surface matched and missing skills.",
+    description="API for matching resumes with job descriptions",
+    version="1.0.0",
 )
 
-# Allow the Vite dev server to call the API during local development.
+# Allow requests from the deployed Vercel frontend and local development.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_origins=[
+        "https://resume-analyzer-eta-nine.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
-app.include_router(analyze_router)
+
+class AnalyzeRequest(BaseModel):
+    resume_text: str = Field(min_length=1, max_length=20000)
+    job_description: str = Field(min_length=1, max_length=20000)
 
 
-@app.get("/api/health", tags=["health"])
+@app.get("/")
+def root():
+    return {"message": "AI Resume Analyzer API is running"}
+
+
+@app.get("/api/health")
 def health_check():
-    """Confirm the API is running."""
     return {"status": "ok"}
+
+
+@app.post("/api/analyze")
+def analyze(request: AnalyzeRequest):
+    return analyze_resume(
+        request.resume_text,
+        request.job_description,
+    )
