@@ -10,7 +10,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow requests from the deployed Vercel frontend and local development.
+# Allow the Vite dev server to call the API during local development.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -23,18 +23,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-
-class AnalyzeRequest(BaseModel):
-    resume_text: str = Field(min_length=1, max_length=20000)
-    job_description: str = Field(min_length=1, max_length=20000)
+app.include_router(analyze_router)
 
 
-@app.get("/")
-def root():
-    return {"message": "AI Resume Analyzer API is running"}
-
-
-@app.get("/api/health")
+@app.get("/api/health", tags=["health"])
 def health_check():
     return {"status": "ok"}
 
@@ -45,3 +37,6 @@ def analyze(request: AnalyzeRequest):
         request.resume_text,
         request.job_description,
     )
+
+
+app.include_router(analyze_router)
