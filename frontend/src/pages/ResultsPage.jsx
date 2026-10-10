@@ -5,15 +5,25 @@
  *   result  {AnalyzeResult}   Parsed API response object
  *   onReset {() => void}      Called when "Analyze Again" is clicked
  */
+import { useState } from 'react'
 import ScoreCard from '../components/ScoreCard'
 import SkillList from '../components/SkillList'
 import Suggestions from '../components/Suggestions'
+import {
+  COVERAGE_EXPLANATION,
+  OVERLAP_EXPLANATION,
+  createResultsSummary,
+  copyTextToClipboard,
+  downloadResultsPdf,
+  shareResults,
+} from '../utils/resultsActions'
 
 const NO_SKILLS_MESSAGE =
   "We couldn't identify specific skills in this text. " +
   "Try adding more detail or specific technology names."
 
 export default function ResultsPage({ result, onReset }) {
+  const [actionMessage, setActionMessage] = useState('')
   const {
     coverage_score,
     overlap_score,
@@ -30,6 +40,37 @@ export default function ResultsPage({ result, onReset }) {
     missing_skills.length === 0 &&
     extra_skills.length === 0
 
+  async function handleCopy() {
+    setActionMessage('')
+    try {
+      await copyTextToClipboard(createResultsSummary(result))
+      setActionMessage('Results copied to clipboard.')
+    } catch {
+      setActionMessage('Could not copy results. Please check clipboard access and try again.')
+    }
+  }
+
+  async function handleShare() {
+    setActionMessage('')
+    try {
+      const outcome = await shareResults(result)
+      if (outcome === 'shared') setActionMessage('Share sheet opened with your results.')
+      if (outcome === 'copied') setActionMessage('Sharing is unavailable; results copied to clipboard.')
+    } catch {
+      setActionMessage('Could not share results. Please try copying them instead.')
+    }
+  }
+
+  function handleDownload() {
+    setActionMessage('')
+    try {
+      downloadResultsPdf(result)
+      setActionMessage('PDF report downloaded.')
+    } catch {
+      setActionMessage('Could not create the PDF report. Please try again.')
+    }
+  }
+
   return (
     <main className="page">
       <div className="container">
@@ -45,6 +86,19 @@ export default function ResultsPage({ result, onReset }) {
             &#8592; Analyze Again
           </button>
         </div>
+
+        <div className="results-actions" aria-label="Result actions">
+          <button type="button" className="btn btn--secondary" onClick={handleDownload} aria-label="Download results as PDF">
+            Download PDF
+          </button>
+          <button type="button" className="btn btn--secondary" onClick={handleShare} aria-label="Share results summary">
+            Share Results
+          </button>
+          <button type="button" className="btn btn--secondary" onClick={handleCopy} aria-label="Copy results summary">
+            Copy Results
+          </button>
+        </div>
+        <p className="results-actions__feedback" role="status" aria-live="polite">{actionMessage}</p>
 
         {/* Score disclaimer */}
         <div className="disclaimer">
@@ -64,12 +118,12 @@ export default function ResultsPage({ result, onReset }) {
           <ScoreCard
             label="Job Requirement Coverage"
             score={coverage_score}
-            explanation="Percentage of the job's required skills found in your resume."
+            explanation={COVERAGE_EXPLANATION}
           />
           <ScoreCard
             label="Overall Skill Overlap"
             score={overlap_score}
-            explanation="Percentage of all skills mentioned across both documents that you share."
+            explanation={OVERLAP_EXPLANATION}
           />
         </div>
 

@@ -657,6 +657,20 @@ p { margin: 0 0 1rem; }
   margin: 0;
 }
 
+.results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .625rem;
+  margin: 0 0 .25rem;
+}
+
+.results-actions__feedback {
+  min-height: 1.5em;
+  margin: 0 0 .75rem;
+  color: var(--color-muted);
+  font-size: .875rem;
+}
+
 /* --- Empty state ---------------------------------------------------------- */
 .empty-state {
   text-align: center;
@@ -698,5 +712,10 @@ p { margin: 0 0 1rem; }
   .results-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .results-actions .btn {
+    flex: 1 1 auto;
+    padding-inline: .75rem;
   }
 }
