@@ -7,9 +7,9 @@
  * Returns the parsed JSON body on success.
  * Throws an Error with a user-friendly `.message` on failure.
  */
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  'http://localhost:8000'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? 'http://localhost:8000' : 'https://resume-analyzer-nq0q.onrender.com')
 
 const ANALYZE_URL = `${API_BASE_URL}/api/analyze`
 /**
