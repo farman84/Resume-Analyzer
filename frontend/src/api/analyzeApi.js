@@ -7,9 +7,8 @@
  * Returns the parsed JSON body on success.
  * Throws an Error with a user-friendly `.message` on failure.
  */
-
-const ANALYZE_URL = '/api/analyze'
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+const ANALYZE_URL = `${API_BASE_URL}/api/analyze`
 /**
  * @typedef {Object} AnalyzeResult
  * @property {number}   coverage_score
