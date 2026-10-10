@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 
-from analyzer import analyze_resume
+from routers.analyze import router as analyze_router
 
 app = FastAPI(
     title="AI Resume Analyzer API",
@@ -10,7 +9,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow the Vite dev server to call the API during local development.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -23,20 +21,15 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-app.include_router(analyze_router)
+
+@app.get("/")
+def root():
+    return {"message": "AI Resume Analyzer API is running"}
 
 
-@app.get("/api/health", tags=["health"])
+@app.get("/api/health")
 def health_check():
     return {"status": "ok"}
-
-
-@app.post("/api/analyze")
-def analyze(request: AnalyzeRequest):
-    return analyze_resume(
-        request.resume_text,
-        request.job_description,
-    )
 
 
 app.include_router(analyze_router)
