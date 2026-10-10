@@ -9,7 +9,7 @@
  *
  * No React Router — the app has two views and a single back action.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './styles/index.css'
 
 import HomePage    from './pages/HomePage'
@@ -18,9 +18,25 @@ import LoadingSpinner from './components/LoadingSpinner'
 import { analyzeResume } from './api/analyzeApi'
 
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
+    } catch {
+      return 'light'
+    }
+  })
   const [status, setStatus]   = useState('idle')   // 'idle' | 'loading' | 'results' | 'error'
   const [result, setResult]   = useState(null)
   const [error,  setError]    = useState(null)      // { title, detail }
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try {
+      localStorage.setItem('theme', theme)
+    } catch {
+      // The selected theme still works when browser storage is unavailable.
+    }
+  }, [theme])
 
   async function handleSubmit(resumeText, jobDescription) {
     setStatus('loading')
@@ -52,7 +68,7 @@ export default function App() {
   if (status === 'results' && result) {
     return (
       <>
-        <Header />
+        <Header theme={theme} onToggleTheme={() => setTheme(current => current === 'light' ? 'dark' : 'light')} />
         <ResultsPage result={result} onReset={handleReset} />
       </>
     )
@@ -60,7 +76,7 @@ export default function App() {
 
   return (
     <>
-      <Header />
+      <Header theme={theme} onToggleTheme={() => setTheme(current => current === 'light' ? 'dark' : 'light')} />
       {status === 'loading' && <LoadingSpinner />}
       {status !== 'loading' && (
         <HomePage
@@ -74,12 +90,30 @@ export default function App() {
   )
 }
 
-function Header() {
+function Header({ theme, onToggleTheme }) {
   return (
     <header className="site-header">
       <div className="container">
         <div className="site-header__inner">
           <span className="site-header__logo">AI Resume Analyzer</span>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={onToggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+          >
+            {theme === 'light' ? (
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+              </svg>
+            ) : (
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.2 15.3A8.5 8.5 0 0 1 8.7 3.8 8.5 8.5 0 1 0 20.2 15.3Z" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
     </header>
