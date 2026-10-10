@@ -1,8 +1,7 @@
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pytest==8.2.0
-httpx2==0.28.1
-
+httpx==0.28.1
 # spaCy is listed here for environments that support it (Python <= 3.12 typical).
 # On Python 3.14 in restricted Windows environments, the compiled DLL may be
 # blocked by Application Control policies. The analysis engine falls back to
