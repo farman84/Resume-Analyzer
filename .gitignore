@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node and Vite
+node_modules/
+dist/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Temporary files
+.vscode/
+.DS_Store
+Thumbs.db
