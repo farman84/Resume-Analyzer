@@ -12,6 +12,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? 'http://localhost:8000' : 'https://resume-analyzer-nq0q.onrender.com')
 
 const ANALYZE_URL = `${API_BASE_URL}/api/analyze`
+const HEALTH_URL = `${API_BASE_URL}/api/health`
+
+export function warmBackend() {
+  void fetch(HEALTH_URL).catch(() => {})
+}
+
 /**
  * @typedef {Object} AnalyzeResult
  * @property {number}   coverage_score
